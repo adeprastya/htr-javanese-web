@@ -9,7 +9,7 @@ const BADGES = [
 	{ char: "ꦢ", top: "52%", right: "3%", size: 40, delay: 0.5 }
 ];
 
-function FloatingBadge({ char, top, left, right, size, delay }) {
+function FloatingBadge({ char, top, left = "", right = "", size, delay }) {
 	return (
 		<div
 			style={{
@@ -40,7 +40,9 @@ function FloatingBadge({ char, top, left, right, size, delay }) {
 
 export function Hero() {
 	return (
-		<section style={{ position: "relative", textAlign: "center", padding: "72px 24px 56px", overflow: "hidden" }}>
+		<section
+			style={{ position: "relative", textAlign: "center", padding: "72px 24px 56px", overflow: "hidden", right: 0 }}
+		>
 			{BADGES.map((b, i) => (
 				<FloatingBadge key={i} {...b} />
 			))}
