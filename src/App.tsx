@@ -4,7 +4,7 @@ import { ScanText, RefreshCw } from "lucide-react";
 import {
 	Navbar,
 	Hero,
-	DropZone,
+	DropZoneBox,
 	ImagePreview,
 	ImageToolbar,
 	PredictionResult,
@@ -52,7 +52,7 @@ export default function App() {
 					{/* Upload / Preview card */}
 					<div style={card}>
 						{!editor.imgEl ? (
-							<DropZone onFile={handleLoadFile} />
+							<DropZoneBox onFile={handleLoadFile} />
 						) : (
 							<ImagePreview
 								canvasRef={canvasRef}

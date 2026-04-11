@@ -1,10 +1,7 @@
 import { useRef, useState } from "react";
 import { Upload } from "lucide-react";
 
-/**
- * @param {{ onFile: (file: File) => void }} props
- */
-export function DropZone({ onFile }) {
+export function DropZoneBox({ onFile }) {
 	const [dragOver, setDragOver] = useState(false);
 	const fileRef = useRef(null);
 
