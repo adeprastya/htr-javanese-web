@@ -1,29 +1,24 @@
-const NAV_LINKS = ["Model", "Dataset", "Code"];
+const NAV_LINKS = [
+	{ name: "Model", href: "#model" },
+	{ name: "Dataset", href: "https://drive.google.com/drive/folders/1F-Nur1FKPLDoY68k3_qi8veBSDO59jON?usp=sharing" },
+	{ name: "Code", href: "https://github.com/adeprastya/htr-javanese-model" }
+] as const;
 
 export function Navbar() {
 	return (
-		<nav
-			style={{
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "space-between",
-				padding: "18px 48px",
-				background: "rgba(255,255,255,0.45)",
-				backdropFilter: "blur(12px)",
-				borderBottom: "1px solid rgba(255,255,255,0.6)",
-				position: "sticky",
-				top: 0,
-				zIndex: 100
-			}}
-		>
-			<span style={{ fontWeight: 700, fontSize: 18, color: "#1e293b", letterSpacing: "-0.3px" }}>
-				JavaneseScript.ai
-			</span>
-			<div style={{ display: "flex", gap: 32 }}>
-				{NAV_LINKS.map((l) => (
-					<span key={l} className="nav-link">
-						{l}
-					</span>
+		<nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 bg-neutral-100/40 backdrop-blur-md border-b border-neutral-200/60">
+			<span className="font-bold text-base text-neutral-800 tracking-tight">JavaneseScript</span>
+
+			<div className="flex items-center gap-6 md:gap-8">
+				{NAV_LINKS.map((link) => (
+					<a
+						key={link.href}
+						href={link.href}
+						target="_blank"
+						className="text-xs md:text-sm font-medium text-neutral-600 hover:text-sky-500 cursor-pointer transition-colors duration-150"
+					>
+						{link.name}
+					</a>
 				))}
 			</div>
 		</nav>

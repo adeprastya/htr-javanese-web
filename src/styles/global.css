@@ -1,15 +1,32 @@
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap");
+@font-face {
+	font-family: "DM Sans";
+	src: url("fonts/DM_Sans/DMSans-VariableFont_opsz,wght.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: "DM Mono";
+	src: url("fonts/DM_Mono/DMMono-Regular.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: "Noto Sans Javanese";
+	src: url("fonts/Noto_Sans_Javanese/static/NotoSansJavanese-Regular.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+}
 
-*,
-*::before,
-*::after {
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
+@import "tailwindcss";
+
+@theme {
+	--font-sans: "DM Sans", sans-serif;
+	--font-mono: "DM Mono", monospace;
+	--font-javanese: "Noto Sans Javanese", sans-serif;
 }
 
 body {
-	font-family: "Sora", sans-serif;
+	@apply font-sans;
 }
 
 /* ── Animations ── */

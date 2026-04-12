@@ -2,14 +2,24 @@ import { useState, useCallback } from "react";
 import { predictImage } from "../utils/api";
 import { canvasToBlob } from "../utils/canvas";
 
-/**
- * Handles prediction state and API call.
- * @param {React.RefObject<HTMLCanvasElement>} canvasRef
- */
-export function usePredict(canvasRef) {
-	const [result, setResult] = useState(null);
+interface PredictionResponse {
+	status: "success" | "error";
+	prediction?: string;
+	message?: string;
+}
+
+export interface PredictState {
+	result: PredictionResponse | null;
+	loading: boolean;
+	error: string | null;
+	predict: () => Promise<void>;
+	clearResult: () => void;
+}
+
+export function usePredict(canvasRef: React.RefObject<HTMLCanvasElement>): PredictState {
+	const [result, setResult] = useState<PredictionResponse | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState(null);
+	const [error, setError] = useState<string | null>(null);
 
 	const predict = useCallback(async () => {
 		if (!canvasRef.current) return;
@@ -22,7 +32,7 @@ export function usePredict(canvasRef) {
 			const data = await predictImage(blob);
 			setResult(data);
 		} catch (err) {
-			setError(err.message ?? "Gagal terhubung ke server");
+			setError(err instanceof Error ? err.message : "Gagal terhubung ke server");
 		} finally {
 			setLoading(false);
 		}

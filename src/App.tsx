@@ -1,4 +1,3 @@
-import "./styles/global.css";
 import { useRef } from "react";
 import { ScanText, RefreshCw } from "lucide-react";
 import {
@@ -15,47 +14,35 @@ import {
 import { useImageEditor, usePredict } from "./hooks";
 
 export default function App() {
-	const canvasRef = useRef(null);
+	const canvasRef = useRef<HTMLCanvasElement>(null);
 
-	const editor = useImageEditor(canvasRef);
-	const predict = usePredict(canvasRef);
+	const editor = useImageEditor(canvasRef as React.RefObject<HTMLCanvasElement>);
+	const predict = usePredict(canvasRef as React.RefObject<HTMLCanvasElement>);
 
-	const handleLoadFile = (file) => {
+	const handleLoadFile = (file: File) => {
 		editor.loadFile(file);
 		predict.clearResult();
 	};
 
 	return (
 		<div
-			style={{
-				minHeight: "100vh",
-				background: "linear-gradient(135deg, #c8d8f0 0%, #ddd0ed 45%, #f0cece 100%)",
-				fontFamily: "'Sora', sans-serif"
-			}}
+			className="min-h-screen font-sans"
+			style={{ background: "linear-gradient(135deg, #c8d8f0 0%, #ddd0ed 45%, #f0cece 100%)" }}
 		>
 			<Navbar />
 			<Hero />
 
 			{/* ── Main two-column layout ── */}
-			<section
-				style={{
-					display: "grid",
-					gridTemplateColumns: "1fr 1fr",
-					gap: 24,
-					maxWidth: 1100,
-					margin: "0 auto",
-					padding: "0 24px 48px"
-				}}
-			>
+			<section className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-screen mx-auto px-6 pb-12">
 				{/* Left column */}
-				<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+				<div className="flex flex-col gap-4">
 					{/* Upload / Preview card */}
-					<div style={card}>
+					<div className="bg-neutral-100/65 backdrop-blur-md border border-neutral-200/80 rounded-2xl p-7 shadow-sm">
 						{!editor.imgEl ? (
 							<DropZoneBox onFile={handleLoadFile} />
 						) : (
 							<ImagePreview
-								canvasRef={canvasRef}
+								canvasRef={canvasRef as React.RefObject<HTMLCanvasElement>}
 								cropMode={editor.cropMode}
 								cropRect={editor.cropRect}
 								hasCropSelection={editor.hasCropSelection}
@@ -73,7 +60,7 @@ export default function App() {
 						)}
 					</div>
 
-					{/* Toolbar (only when an image is loaded) */}
+					{/* Toolbar */}
 					{editor.imgEl && (
 						<ImageToolbar
 							cropMode={editor.cropMode}
@@ -89,14 +76,20 @@ export default function App() {
 
 					{/* Predict button */}
 					{editor.imgEl && (
-						<button className="predict-btn" onClick={predict.predict} disabled={predict.loading || editor.claheLoading}>
+						<button
+							onClick={predict.predict}
+							disabled={predict.loading || editor.claheLoading}
+							className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-base text-neutral-100 bg-linear-to-br from-sky-500 to-violet-500 hover:opacity-90 transition-opacity duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer border-none"
+						>
 							{predict.loading ? (
 								<>
-									<RefreshCw size={18} style={{ animation: "spin 1s linear infinite" }} /> Memproses…
+									<RefreshCw size={18} className="animate-spin" />
+									Memproses…
 								</>
 							) : (
 								<>
-									<ScanText size={18} /> Kenali Aksara Jawa
+									<ScanText size={18} />
+									Kenali Aksara Jawa
 								</>
 							)}
 						</button>
@@ -104,7 +97,7 @@ export default function App() {
 				</div>
 
 				{/* Right column */}
-				<div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+				<div className="flex flex-col gap-4">
 					<PredictionResult result={predict.result} loading={predict.loading} error={predict.error} />
 					<TipsCard />
 				</div>
@@ -115,13 +108,3 @@ export default function App() {
 		</div>
 	);
 }
-
-// ── Shared card style ────────────────────────────────────────────────────────
-const card = {
-	background: "rgba(255,255,255,0.65)",
-	backdropFilter: "blur(16px)",
-	border: "1px solid rgba(255,255,255,0.8)",
-	borderRadius: 20,
-	padding: 28,
-	boxShadow: "0 8px 32px rgba(100,120,200,0.08)"
-};

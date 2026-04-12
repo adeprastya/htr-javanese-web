@@ -1,6 +1,15 @@
 import { Zap } from "lucide-react";
 
-const BADGES = [
+interface Badge {
+	char: string;
+	top: string;
+	left?: string;
+	right?: string;
+	size: number;
+	delay: number;
+}
+
+const BADGES: Badge[] = [
 	{ char: "ꦲ", top: "14%", left: "12%", size: 48, delay: 0 },
 	{ char: "ꦤ", top: "28%", left: "5%", size: 44, delay: 0.6 },
 	{ char: "ꦕ", top: "13%", right: "8%", size: 52, delay: 0.3 },
@@ -9,78 +18,50 @@ const BADGES = [
 	{ char: "ꦢ", top: "52%", right: "3%", size: 40, delay: 0.5 }
 ];
 
-function FloatingBadge({ char, top, left = "", right = "", size, delay }) {
+function FloatingBadge({ char, top, left, right, size, delay }: Badge) {
 	return (
 		<div
+			className="scale-50 sm:scale-100 absolute flex items-center justify-center rounded-xl bg-neutral-100/55 backdrop-blur-sm border border-neutral-200/80 shadow-sm select-none z-10 animate-[floatBadge_4s_ease-in-out_infinite_alternate]"
 			style={{
-				position: "absolute",
 				top,
 				left,
 				right,
 				width: size + 16,
 				height: size + 16,
-				background: "rgba(255,255,255,0.55)",
-				backdropFilter: "blur(8px)",
-				border: "1px solid rgba(255,255,255,0.8)",
-				borderRadius: 14,
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
 				fontSize: size * 0.65,
-				animation: `floatBadge 4s ease-in-out ${delay}s infinite alternate`,
-				boxShadow: "0 4px 20px rgba(100,120,200,0.12)",
-				userSelect: "none",
-				zIndex: 1
+				animationDelay: `${delay}s`
 			}}
 		>
-			{char}
+			<span className="font-javanese">{char}</span>
 		</div>
 	);
 }
 
 export function Hero() {
 	return (
-		<section
-			style={{ position: "relative", textAlign: "center", padding: "72px 24px 56px", overflow: "hidden", right: 0 }}
-		>
-			{BADGES.map((b, i) => (
-				<FloatingBadge key={i} {...b} />
+		<section className="relative text-center px-6 pt-16 pb-14 overflow-hidden">
+			{BADGES.map((badge, i) => (
+				<FloatingBadge key={i} {...badge} />
 			))}
 
-			<div
-				style={{
-					display: "inline-flex",
-					alignItems: "center",
-					gap: 8,
-					background: "rgba(79,110,247,0.12)",
-					border: "1px solid rgba(79,110,247,0.25)",
-					borderRadius: 20,
-					padding: "6px 16px",
-					fontSize: 13,
-					fontWeight: 500,
-					color: "#4f6ef7",
-					marginBottom: 24
-				}}
-			>
-				<Zap size={14} /> Hybrid Deep Learning Model!
+			{/* Badge pill */}
+			<div className="inline-flex items-center gap-2 bg-sky-100/20 border border-sky-500/25 rounded-full px-4 py-1.5 text-sm font-mono font-medium text-sky-500 mb-6">
+				<Zap size={14} />
+				Hybrid Deep Learning Model!
 			</div>
 
+			{/* Heading */}
 			<h1
-				style={{
-					fontSize: "clamp(32px,5vw,58px)",
-					fontWeight: 700,
-					color: "#1e293b",
-					lineHeight: 1.15,
-					marginBottom: 20,
-					letterSpacing: "-1px"
-				}}
+				className="font-bold text-neutral-800 leading-tight tracking-tight mb-5"
+				style={{ fontSize: "clamp(36px, 5vw, 58px)", letterSpacing: "-1px" }}
 			>
 				Sistem AI Pengenalan Teks
 				<br />
 				Aksara Jawa Nglegena
 			</h1>
 
-			<p style={{ color: "#475569", fontSize: 17, maxWidth: 560, margin: "0 auto", lineHeight: 1.7 }}>
+			{/* Subtitle */}
+			<p className="text-neutral-500 text-lg max-w-xl mx-auto leading-relaxed">
 				Kenali dan transliterasikan gambar teks Aksara Jawa secara instan menggunakan arsitektur jaringan saraf canggih
 				dengan metode modern
 			</p>

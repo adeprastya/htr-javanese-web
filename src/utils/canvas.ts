@@ -1,13 +1,20 @@
+import type { CLAHEOptions } from "./clahe";
 import { applyCLAHE } from "./clahe";
 
-/**
- * Draw an image onto a canvas with rotation applied.
- * @param {HTMLCanvasElement} canvas
- * @param {HTMLImageElement} imgEl
- * @param {number} rotation - degrees
- */
-export function renderToCanvas(canvas, imgEl, rotation) {
-	const ctx = canvas.getContext("2d");
+interface CropRect {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
+
+interface Point {
+	x: number;
+	y: number;
+}
+
+export function renderToCanvas(canvas: HTMLCanvasElement, imgEl: HTMLImageElement, rotation: number): void {
+	const ctx = canvas.getContext("2d")!;
 	const w = imgEl.naturalWidth;
 	const h = imgEl.naturalHeight;
 	const rad = (rotation * Math.PI) / 180;
@@ -26,62 +33,45 @@ export function renderToCanvas(canvas, imgEl, rotation) {
 	ctx.restore();
 }
 
-/**
- * Apply CLAHE to the current canvas content in-place.
- * @param {HTMLCanvasElement} canvas
- * @param {object} claheOpts - forwarded to applyCLAHE
- */
-export function applyCanvasCLAHE(canvas, claheOpts = {}) {
-	const ctx = canvas.getContext("2d");
+export function applyCanvasCLAHE(canvas: HTMLCanvasElement, claheOpts: CLAHEOptions = {}): void {
+	const ctx = canvas.getContext("2d")!;
 	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	ctx.putImageData(applyCLAHE(imageData, claheOpts), 0, 0);
 }
 
-/**
- * Crop a canvas region into a new Blob.
- * @param {HTMLCanvasElement} canvas
- * @param {{ x, y, width, height }} rect - pixel coords on the canvas
- * @returns {Promise<Blob>}
- */
-export function cropCanvasToBlob(canvas, { x, y, width, height }) {
+export function cropCanvasToBlob(canvas: HTMLCanvasElement, { x, y, width, height }: CropRect): Promise<Blob> {
 	const tmp = document.createElement("canvas");
 	tmp.width = width;
 	tmp.height = height;
-	tmp.getContext("2d").drawImage(canvas, x, y, width, height, 0, 0, width, height);
-	return new Promise((resolve) => tmp.toBlob(resolve, "image/png"));
+	tmp.getContext("2d")!.drawImage(canvas, x, y, width, height, 0, 0, width, height);
+	return new Promise((resolve, reject) =>
+		tmp.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("toBlob failed"))), "image/png")
+	);
 }
 
-/**
- * Export the current canvas contents as a Blob.
- * @param {HTMLCanvasElement} canvas
- * @returns {Promise<Blob>}
- */
-export function canvasToBlob(canvas) {
-	return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+export function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+	return new Promise((resolve, reject) =>
+		canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("toBlob failed"))), "image/png")
+	);
 }
 
-/**
- * Load an image Blob/File into an HTMLImageElement.
- * @param {Blob|File} blob
- * @returns {Promise<HTMLImageElement>}
- */
-export function loadImageFromBlob(blob) {
+export function loadImageFromBlob(blob: Blob | File): Promise<HTMLImageElement> {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
 		const url = URL.createObjectURL(blob);
-		img.onload = () => resolve(img);
-		img.onerror = reject;
+		img.onload = () => {
+			URL.revokeObjectURL(url);
+			resolve(img);
+		};
+		img.onerror = () => {
+			URL.revokeObjectURL(url);
+			reject(new Error("Failed to load image"));
+		};
 		img.src = url;
 	});
 }
 
-/**
- * Convert a display-space mouse event to canvas pixel coordinates.
- * @param {MouseEvent} e
- * @param {HTMLCanvasElement} canvas
- * @returns {{ x: number, y: number }}
- */
-export function toCanvasCoords(e, canvas) {
+export function toCanvasCoords(e: React.MouseEvent<HTMLDivElement>, canvas: HTMLCanvasElement): Point {
 	const rect = canvas.getBoundingClientRect();
 	return {
 		x: ((e.clientX - rect.left) / rect.width) * canvas.width,

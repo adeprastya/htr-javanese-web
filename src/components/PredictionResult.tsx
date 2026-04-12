@@ -1,28 +1,23 @@
-import { ScanText, Check, X, RefreshCw } from "lucide-react";
+import { ScanText, Check, X } from "lucide-react";
 
-/**
- * @param {{
- *   result: object | null,
- *   loading: boolean,
- *   error: string | null,
- * }} props
- */
-export function PredictionResult({ result, loading, error }) {
+interface PredictionResponse {
+	status: "success" | "error";
+	prediction?: string;
+	message?: string;
+}
+
+interface PredictionResultProps {
+	result: PredictionResponse | null;
+	loading: boolean;
+	error: string | null;
+}
+
+export function PredictionResult({ result, loading, error }: PredictionResultProps) {
 	return (
-		<div
-			style={{
-				background: "rgba(255,255,255,0.65)",
-				backdropFilter: "blur(16px)",
-				border: "1px solid rgba(255,255,255,0.8)",
-				borderRadius: 20,
-				padding: 28,
-				boxShadow: "0 8px 32px rgba(100,120,200,0.08)",
-				minHeight: 280
-			}}
-		>
-			<div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-				<ScanText size={16} color="#4f6ef7" />
-				<span style={{ fontWeight: 600, fontSize: 16, color: "#1e293b" }}>Hasil Pengenalan</span>
+		<div className="bg-neutral-100/65 backdrop-blur-md border border-neutral-200/80 rounded-2xl p-7 shadow-sm min-h-72">
+			<div className="flex items-center gap-2 mb-5">
+				<ScanText size={16} className="text-sky-500" />
+				<span className="font-sans font-semibold text-base text-neutral-800">Hasil Pengenalan</span>
 			</div>
 
 			{!result && !loading && !error && <EmptyState />}
@@ -33,7 +28,7 @@ export function PredictionResult({ result, loading, error }) {
 				(result.status === "success" ? (
 					<SuccessState prediction={result.prediction} />
 				) : (
-					<ErrorState message={result.message} />
+					<ErrorState message={result.message ?? "Terjadi kesalahan"} />
 				))}
 		</div>
 	);
@@ -41,9 +36,9 @@ export function PredictionResult({ result, loading, error }) {
 
 function EmptyState() {
 	return (
-		<div style={{ textAlign: "center", padding: "40px 0", color: "#94a3b8" }}>
-			<div style={{ fontSize: 40, marginBottom: 12, opacity: 0.4 }}>ꦲꦏ꧀ꦱꦫ</div>
-			<p style={{ fontFamily: "'Fira Code', monospace", fontSize: 13 }}>
+		<div className="text-center py-10 text-neutral-400">
+			<div className="font-javanese text-4xl mb-3 opacity-40">ꦲꦏ꧀ꦱꦫ</div>
+			<p className="font-mono text-xs sm:text-sm leading-relaxed">
 				Upload gambar untuk
 				<br />
 				melihat hasil transkripsi
@@ -54,93 +49,49 @@ function EmptyState() {
 
 function LoadingState() {
 	return (
-		<div style={{ textAlign: "center", padding: "40px 0" }}>
-			<div
-				style={{
-					width: 48,
-					height: 48,
-					border: "3px solid rgba(79,110,247,0.2)",
-					borderTopColor: "#4f6ef7",
-					borderRadius: "50%",
-					margin: "0 auto 16px",
-					animation: "spin 0.8s linear infinite"
-				}}
-			/>
-			<p style={{ color: "#64748b", fontSize: 14, animation: "pulse 1.5s ease infinite" }}>Mengenali aksara…</p>
+		<div className="text-center py-10">
+			<div className="w-12 h-12 rounded-full border-2 border-sky-200 border-t-sky-500 animate-spin mx-auto mb-4" />
+			<p className="text-neutral-500 text-xs sm:text-sm animate-pulse">Mengenali aksara…</p>
 		</div>
 	);
 }
 
-function SuccessState({ prediction }) {
+interface SuccessStateProps {
+	prediction?: string;
+}
+
+function SuccessState({ prediction }: SuccessStateProps) {
 	return (
-		<div style={{ animation: "fadeIn 0.3s ease" }}>
-			<div
-				style={{
-					background: "rgba(34,197,94,0.08)",
-					border: "1px solid rgba(34,197,94,0.2)",
-					borderRadius: 12,
-					padding: "12px 16px",
-					marginBottom: 16,
-					display: "flex",
-					alignItems: "center",
-					gap: 8
-				}}
-			>
-				<Check size={15} color="#16a34a" />
-				<span style={{ fontSize: 13, color: "#15803d", fontWeight: 500 }}>Pengenalan berhasil</span>
+		<div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+			<div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
+				<Check size={15} className="text-green-600" />
+				<span className="text-sm text-green-700 font-medium">Pengenalan berhasil</span>
 			</div>
-			<div
-				style={{
-					background: "rgba(15,23,42,0.04)",
-					borderRadius: 12,
-					padding: 20,
-					border: "1px solid rgba(15,23,42,0.08)"
-				}}
-			>
-				<p
-					style={{
-						fontSize: 11,
-						color: "#94a3b8",
-						fontWeight: 500,
-						marginBottom: 10,
-						letterSpacing: "0.5px",
-						textTransform: "uppercase"
-					}}
-				>
+
+			<div className="bg-neutral-100 border border-neutral-200 rounded-xl p-5">
+				<p className="text-xs sm:text-sm text-neutral-400 font-medium uppercase tracking-wide mb-2">
 					Transliterasi Latin
 				</p>
-				<p
-					style={{
-						fontFamily: "'Fira Code', monospace",
-						fontSize: 22,
-						fontWeight: 500,
-						color: "#1e293b",
-						letterSpacing: 2,
-						wordBreak: "break-all"
-					}}
-				>
-					{prediction || "—"}
+				<p className="font-mono text-lg sm:text-xl font-medium text-neutral-800 tracking-widest break-all">
+					{prediction ?? "—"}
 				</p>
 			</div>
 		</div>
 	);
 }
 
-function ErrorState({ message }) {
+interface ErrorStateProps {
+	message: string;
+}
+
+function ErrorState({ message }: ErrorStateProps) {
 	return (
-		<div
-			style={{
-				background: "rgba(239,68,68,0.08)",
-				border: "1px solid rgba(239,68,68,0.2)",
-				borderRadius: 12,
-				padding: 16
-			}}
-		>
-			<div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-				<X size={15} color="#dc2626" />
-				<span style={{ fontSize: 13, color: "#dc2626", fontWeight: 600 }}>Error</span>
+		<div className="bg-red-50 border border-red-200 rounded-xl p-4">
+			<div className="flex items-center gap-2 mb-1.5">
+				<X size={15} className="text-red-600" />
+				<span className="text-xs sm:text-sm text-red-600 font-semibold">Error</span>
 			</div>
-			<p style={{ fontSize: 14, color: "#7f1d1d", fontFamily: "'Fira Code', monospace" }}>{message}</p>
+			<p className="text-xs sm:text-sm text-red-900 font-mono">{message}</p>
 		</div>
 	);
 }

@@ -1,52 +1,29 @@
-const FEATURES = [
+interface Feature {
+	icon: string;
+	title: string;
+	desc: string;
+}
+
+const FEATURES: Feature[] = [
 	{ icon: "⚙️", title: "Model Hybrid", desc: "Optimasi teks tulisan tangan" },
-	{ icon: "⚡", title: "Inferensi Cepat", desc: "Proses prediksi dibawah 200ms" },
+	{ icon: "⚡", title: "Inferensi Cepat", desc: "Proses prediksi dibawah 20ms" },
 	{ icon: "🎯", title: "95% Akurat", desc: "Ditest dengan tulisan bervariasi" }
 ];
 
 export function FeatureCards() {
 	return (
-		<section
-			style={{
-				maxWidth: 1100,
-				margin: "0 auto",
-				padding: "0 24px 64px",
-				display: "grid",
-				gridTemplateColumns: "repeat(3, 1fr)",
-				gap: 16
-			}}
-		>
+		<section className="max-w-screen mx-auto px-6 pb-16 grid grid-cols-1 sm:grid-cols-3 gap-4">
 			{FEATURES.map(({ icon, title, desc }) => (
 				<div
 					key={title}
-					style={{
-						background: "rgba(255,255,255,0.55)",
-						backdropFilter: "blur(12px)",
-						border: "1px solid rgba(255,255,255,0.75)",
-						borderRadius: 16,
-						padding: "20px 22px",
-						display: "flex",
-						alignItems: "center",
-						gap: 14
-					}}
+					className="flex items-center gap-4 bg-neutral-100/55 backdrop-blur-md border border-neutral-200/75 rounded-2xl px-5 py-5"
 				>
-					<div
-						style={{
-							fontSize: 22,
-							width: 44,
-							height: 44,
-							background: "rgba(79,110,247,0.1)",
-							borderRadius: 12,
-							display: "flex",
-							alignItems: "center",
-							justifyContent: "center"
-						}}
-					>
+					<div className="flex items-center justify-center shrink-0 w-11 h-11 text-xl bg-sky-500/10 rounded-xl">
 						{icon}
 					</div>
 					<div>
-						<p style={{ fontWeight: 600, fontSize: 14, color: "#1e293b", marginBottom: 3 }}>{title}</p>
-						<p style={{ fontSize: 13, color: "#64748b" }}>{desc}</p>
+						<p className="font-semibold text-sm text-neutral-800 mb-0.5">{title}</p>
+						<p className="text-sm text-neutral-400">{desc}</p>
 					</div>
 				</div>
 			))}

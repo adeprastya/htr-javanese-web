@@ -1,6 +1,20 @@
+export interface CLAHEOptions {
+	tilesX?: number;
+	tilesY?: number;
+	clipLimit?: number;
+}
+
 const N = 256;
 
-function buildTileLUT(data, width, x0, y0, x1, y1, clipLimit) {
+function buildTileLUT(
+	data: Uint8ClampedArray,
+	width: number,
+	x0: number,
+	y0: number,
+	x1: number,
+	y1: number,
+	clipLimit: number
+): Uint8Array {
 	const hist = new Int32Array(N);
 	let count = 0;
 
@@ -35,25 +49,19 @@ function buildTileLUT(data, width, x0, y0, x1, y1, clipLimit) {
 	return lut;
 }
 
-/**
- * Apply CLAHE (Contrast Limited Adaptive Histogram Equalization) to ImageData.
- * @param {ImageData} imageData
- * @param {object} opts
- * @param {number} opts.tilesX
- * @param {number} opts.tilesY
- * @param {number} opts.clipLimit
- * @returns {ImageData}
- */
-export function applyCLAHE(imageData, { tilesX = 8, tilesY = 8, clipLimit = 2.5 } = {}) {
+export function applyCLAHE(
+	imageData: ImageData,
+	{ tilesX = 8, tilesY = 8, clipLimit = 2.5 }: CLAHEOptions = {}
+): ImageData {
 	const { data, width, height } = imageData;
 	const out = new Uint8ClampedArray(data);
 	const tileW = Math.ceil(width / tilesX);
 	const tileH = Math.ceil(height / tilesY);
 
-	const luts = Array.from({ length: tilesY }, (_, ty) =>
+	const luts: Uint8Array[][] = Array.from({ length: tilesY }, (_, ty) =>
 		Array.from({ length: tilesX }, (_, tx) => {
-			const x0 = tx * tileW,
-				y0 = ty * tileH;
+			const x0 = tx * tileW;
+			const y0 = ty * tileH;
 			const x1 = Math.min(x0 + tileW, width);
 			const y1 = Math.min(y0 + tileH, height);
 			return buildTileLUT(data, width, x0, y0, x1, y1, clipLimit);

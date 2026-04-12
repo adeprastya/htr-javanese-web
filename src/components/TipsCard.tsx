@@ -8,36 +8,22 @@ const TIPS = [
 
 export function TipsCard() {
 	return (
-		<div
-			style={{
-				background: "linear-gradient(135deg, #4f6ef7 0%, #7c3aed 100%)",
-				borderRadius: 20,
-				padding: 24,
-				boxShadow: "0 8px 32px rgba(79,110,247,0.25)"
-			}}
-		>
-			<div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-				<Info size={16} color="rgba(255,255,255,0.8)" />
-				<span style={{ fontWeight: 600, fontSize: 15, color: "white" }}>Tips</span>
+		<div className="rounded-2xl p-6 shadow-xl bg-linear-to-br from-sky-600 to-violet-600">
+			<div className="flex items-center gap-2 mb-3">
+				<Info size={16} className="text-neutral-50" />
+				<span className="font-sans font-semibold text-base text-white">Tips</span>
 			</div>
 
-			<p
-				style={{
-					fontFamily: "'Fira Code', monospace",
-					fontSize: 13,
-					color: "rgba(255,255,255,0.85)",
-					lineHeight: 1.7
-				}}
-			>
+			<p className="font-mono text-xs sm:text-sm text-neutral-100 leading-relaxed">
 				Untuk hasil pengenalan yang lebih baik, pastikan tulisan mendapat pencahayaan yang baik dan kamera sejajar
 				dengan permukaan
 			</p>
 
-			<div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 8 }}>
+			<div className="font-mono mt-4 flex flex-col gap-2">
 				{TIPS.map((tip) => (
-					<div key={tip} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-						<ChevronRight size={13} color="rgba(255,255,255,0.6)" />
-						<span style={{ fontSize: 13, color: "rgba(255,255,255,0.8)" }}>{tip}</span>
+					<div key={tip} className="flex items-center gap-2">
+						<ChevronRight size={13} className="text-neutral-100 shrink-0" />
+						<span className="text-xs sm:text-sm text-neutral-100">{tip}</span>
 					</div>
 				))}
 			</div>
