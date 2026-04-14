@@ -1,9 +1,10 @@
 import { ChevronRight, Info } from "lucide-react";
 
 const TIPS = [
-	"Gunakan CLAHE jika kontras gambar rendah",
-	"Crop area tulisan sebelum prediksi",
-	"Rotasi jika teks miring"
+	"Crop area tulisan untuk mengurangi ruang kosong",
+	"Terapkan rotasi untuk teks yang miring",
+	"Atur gamma untuk meningkatkan pencahayaan",
+	"Terapkan kontras untuk memperjelas teks"
 ];
 
 export function TipsCard() {

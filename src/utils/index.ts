@@ -1,10 +1,3 @@
 export { applyCLAHE } from "./clahe";
-export {
-	renderToCanvas,
-	applyCanvasCLAHE,
-	cropCanvasToBlob,
-	canvasToBlob,
-	loadImageFromBlob,
-	toCanvasCoords
-} from "./canvas";
+export { renderToCanvas, canvasToBlob, loadImageFromBlob } from "./canvas";
 export { predictImage } from "./api";

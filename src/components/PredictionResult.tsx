@@ -69,10 +69,8 @@ function SuccessState({ prediction }: SuccessStateProps) {
 			</div>
 
 			<div className="bg-neutral-100 border border-neutral-200 rounded-xl p-5">
-				<p className="text-xs sm:text-sm text-neutral-400 font-medium uppercase tracking-wide mb-2">
-					Transliterasi Latin
-				</p>
-				<p className="font-mono text-lg sm:text-xl font-medium text-neutral-800 tracking-widest break-all">
+				<p className="text-xs sm:text-sm text-neutral-400 font-medium tracking-wide mb-2">Transkripsi</p>
+				<p className="font-javanese text-lg sm:text-xl font-medium text-neutral-800 tracking-widest break-all">
 					{prediction ?? "—"}
 				</p>
 			</div>
@@ -89,7 +87,7 @@ function ErrorState({ message }: ErrorStateProps) {
 		<div className="bg-red-50 border border-red-200 rounded-xl p-4">
 			<div className="flex items-center gap-2 mb-1.5">
 				<X size={15} className="text-red-600" />
-				<span className="text-xs sm:text-sm text-red-600 font-semibold">Error</span>
+				<span className="text-xs sm:text-sm text-red-600 font-semibold">Mohon maaf, terjadi kesalahan</span>
 			</div>
 			<p className="text-xs sm:text-sm text-red-900 font-mono">{message}</p>
 		</div>

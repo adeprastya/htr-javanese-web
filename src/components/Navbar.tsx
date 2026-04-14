@@ -6,10 +6,10 @@ const NAV_LINKS = [
 
 export function Navbar() {
 	return (
-		<nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 bg-neutral-100/40 backdrop-blur-md border-b border-neutral-200/60">
-			<span className="font-bold text-base text-neutral-800 tracking-tight">JavaneseScript</span>
+		<nav className="sticky top-0 z-50 flex items-center justify-between px-3 sm:px-6 md:px-12 py-4 bg-neutral-100/40 backdrop-blur-md border-b border-neutral-200/60">
+			<span className="font-bold text-sm sm:text-base text-neutral-800 tracking-tight">JavaneseScript</span>
 
-			<div className="flex items-center gap-6 md:gap-8">
+			<div className="flex items-center gap-2 sm:gap-6 md:gap-8">
 				{NAV_LINKS.map((link) => (
 					<a
 						key={link.href}

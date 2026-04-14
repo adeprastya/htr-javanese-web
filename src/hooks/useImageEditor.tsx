@@ -1,214 +1,155 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { renderToCanvas, applyCanvasCLAHE, cropCanvasToBlob, loadImageFromBlob, toCanvasCoords } from "../utils/canvas";
-
-interface Point {
-	x: number;
-	y: number;
-}
-
-interface CropRect {
-	left: number;
-	top: number;
-	width: number;
-	height: number;
-}
+import {
+	renderToCanvas,
+	applyCanvasContrastStretch,
+	applyCanvasGamma,
+	cropCanvasByDisplayBox,
+	loadImageFromBlob,
+	type DisplayBox
+} from "../utils/canvas";
 
 export interface ImageEditorState {
 	imgEl: HTMLImageElement | null;
+	cropMode: boolean;
+	cropKey: number;
+	startCropMode: () => void;
+	confirmCrop: (displayBox: DisplayBox) => Promise<void>;
+	cancelCrop: () => void;
 	rotation: number;
 	setRotation: (deg: number) => void;
-	claheEnabled: boolean;
-	setClaheEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-	claheLoading: boolean;
-	cropMode: boolean;
-	cropRect: CropRect | null;
-	hasCropSelection: boolean;
+	gamma: number;
+	setGamma: (value: number) => void;
+	contrastEnabled: boolean;
+	setContrastEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+	processingLoading: boolean;
 	loadFile: (file: File) => void;
-	startCropMode: () => void;
-	cancelCrop: () => void;
-	confirmCrop: () => Promise<void>;
 	reset: () => void;
 	clear: () => void;
-	onMouseDown: React.MouseEventHandler<HTMLDivElement>;
-	onMouseMove: React.MouseEventHandler<HTMLDivElement>;
-	onMouseUp: React.MouseEventHandler<HTMLDivElement>;
 }
+
+const DEFAULT_GAMMA = 1.0;
 
 export function useImageEditor(canvasRef: React.RefObject<HTMLCanvasElement>): ImageEditorState {
 	const [imgEl, setImgEl] = useState<HTMLImageElement | null>(null);
 	const [rotation, setRotation] = useState(0);
-	const [claheEnabled, setClaheEnabled] = useState(false);
-	const [claheLoading, setClaheLoading] = useState(false);
+	const [contrastEnabled, setContrastEnabled] = useState(false);
+	const [gamma, setGamma] = useState(DEFAULT_GAMMA);
+	const [processingLoading, setProcessingLoading] = useState(false);
 	const [cropMode, setCropMode] = useState(false);
-	const [cropStart, setCropStart] = useState<Point | null>(null);
-	const [cropEnd, setCropEnd] = useState<Point | null>(null);
-	const [cropRect, setCropRect] = useState<CropRect | null>(null);
+	const [cropKey, setCropKey] = useState(0);
+	// Incremented by reset() to force effects to re-run even when
+	// other deps haven't changed (e.g. rotation was already 0)
+	const [renderKey, setRenderKey] = useState(0);
 
-	const isDragging = useRef(false);
+	const originalImgRef = useRef<HTMLImageElement | null>(null);
 
-	// ── Render canvas (no setState here) ───────────────────────────────────────
+	// ── Effect 1: base render ─────────────────────────────────────────────────
+	// renderKey is a dependency so reset() can force a re-run
 	useEffect(() => {
 		if (!imgEl || !canvasRef.current) return;
 		renderToCanvas(canvasRef.current, imgEl, rotation);
-	}, [imgEl, rotation, canvasRef]);
+	}, [imgEl, rotation, renderKey, canvasRef]);
 
-	// ── CLAHE (all setState inside callbacks, never synchronously) ─────────────
+	// ── Effect 2: post-processing ─────────────────────────────────────────────
 	useEffect(() => {
-		if (!claheEnabled || !imgEl || !canvasRef.current) return;
+		if (!imgEl || !canvasRef.current) return;
 
 		let cancelled = false;
-
-		// Re-render the base canvas first (CLAHE effect stacks on top)
 		renderToCanvas(canvasRef.current, imgEl, rotation);
 
-		// Tick 1 (setTimeout 0): show the spinner
 		const spinnerTimer = setTimeout(() => {
-			if (!cancelled) setClaheLoading(true);
+			if (!cancelled) setProcessingLoading(true);
 		}, 0);
-
-		// Tick 2 (setTimeout 20): run the heavy CLAHE computation
-		const claheTimer = setTimeout(() => {
+		const processTimer = setTimeout(() => {
 			if (cancelled || !canvasRef.current) return;
-			applyCanvasCLAHE(canvasRef.current);
-			setClaheLoading(false);
+			applyCanvasGamma(canvasRef.current, gamma);
+			if (contrastEnabled) applyCanvasContrastStretch(canvasRef.current);
+			setProcessingLoading(false);
 		}, 20);
 
 		return () => {
 			cancelled = true;
 			clearTimeout(spinnerTimer);
-			clearTimeout(claheTimer);
+			clearTimeout(processTimer);
 		};
-	}, [claheEnabled, imgEl, rotation, canvasRef]);
+	}, [imgEl, rotation, gamma, contrastEnabled, renderKey, canvasRef]);
 
-	// ── Load ────────────────────────────────────────────────────────────────────
+	// ── Load ──────────────────────────────────────────────────────────────────
 	const loadFile = useCallback((file: File) => {
 		if (!file.type.startsWith("image/")) return;
 		loadImageFromBlob(file).then((img) => {
+			originalImgRef.current = img;
 			setImgEl(img);
 			setRotation(0);
-			setClaheEnabled(false);
+			setContrastEnabled(false);
+			setGamma(DEFAULT_GAMMA);
 			setCropMode(false);
-			setCropStart(null);
-			setCropEnd(null);
-			setCropRect(null);
+			setRenderKey(0);
 		});
 	}, []);
 
-	// ── Crop interaction ────────────────────────────────────────────────────────
+	// ── Crop ──────────────────────────────────────────────────────────────────
 	const startCropMode = useCallback(() => {
 		setCropMode(true);
-		setCropStart(null);
-		setCropEnd(null);
-		setCropRect(null);
+		setCropKey((k) => k + 1);
 	}, []);
 
-	const cancelCrop = useCallback(() => {
-		setCropMode(false);
-		setCropStart(null);
-		setCropEnd(null);
-		setCropRect(null);
-		isDragging.current = false;
-	}, []);
+	const cancelCrop = useCallback(() => setCropMode(false), []);
 
-	const confirmCrop = useCallback(async () => {
-		if (!cropStart || !cropEnd || !canvasRef.current) return;
-
-		const x = Math.round(Math.min(cropStart.x, cropEnd.x));
-		const y = Math.round(Math.min(cropStart.y, cropEnd.y));
-		const width = Math.round(Math.abs(cropEnd.x - cropStart.x));
-		const height = Math.round(Math.abs(cropEnd.y - cropStart.y));
-
-		if (width < 4 || height < 4) {
-			cancelCrop();
-			return;
-		}
-
-		const blob = await cropCanvasToBlob(canvasRef.current, { x, y, width, height });
-		const img = await loadImageFromBlob(blob);
-		setImgEl(img);
-		setRotation(0);
-		cancelCrop();
-	}, [cropStart, cropEnd, canvasRef, cancelCrop]);
-
-	// ── Compute display-space cropRect from canvas coords ───────────────────────
-	const computeCropRect = useCallback(
-		(start: Point, end: Point): CropRect | null => {
-			const canvas = canvasRef.current;
-			if (!canvas) return null;
-			const domRect = canvas.getBoundingClientRect();
-			const sx = domRect.width / canvas.width;
-			const sy = domRect.height / canvas.height;
-			return {
-				left: Math.min(start.x, end.x) * sx,
-				top: Math.min(start.y, end.y) * sy,
-				width: Math.abs(end.x - start.x) * sx,
-				height: Math.abs(end.y - start.y) * sy
-			};
+	const confirmCrop = useCallback(
+		async (displayBox: DisplayBox) => {
+			if (!canvasRef.current) return;
+			if (displayBox.w < 4 || displayBox.h < 4) {
+				cancelCrop();
+				return;
+			}
+			const blob = await cropCanvasByDisplayBox(canvasRef.current, displayBox);
+			const img = await loadImageFromBlob(blob);
+			setImgEl(img); // originalImgRef intentionally NOT updated
+			setRotation(0);
+			setCropMode(false);
 		},
-		[canvasRef]
+		[canvasRef, cancelCrop]
 	);
 
-	// ── Mouse handlers ──────────────────────────────────────────────────────────
-	const onMouseDown = useCallback<React.MouseEventHandler<HTMLDivElement>>(
-		(e) => {
-			if (!cropMode || !canvasRef.current) return;
-			isDragging.current = true;
-			const c = toCanvasCoords(e, canvasRef.current);
-			setCropStart(c);
-			setCropEnd(c);
-			setCropRect(null);
-		},
-		[cropMode, canvasRef]
-	);
-
-	const onMouseMove = useCallback<React.MouseEventHandler<HTMLDivElement>>(
-		(e) => {
-			if (!cropMode || !isDragging.current || !canvasRef.current) return;
-			const end = toCanvasCoords(e, canvasRef.current);
-			setCropEnd(end);
-			setCropStart((start) => {
-				if (!start) return start;
-				setCropRect(computeCropRect(start, end));
-				return start;
-			});
-		},
-		[cropMode, canvasRef, computeCropRect]
-	);
-
-	const onMouseUp = useCallback<React.MouseEventHandler<HTMLDivElement>>(() => {
-		isDragging.current = false;
-	}, []);
-
-	// ── Reset / clear ───────────────────────────────────────────────────────────
+	// ── Reset: restore original + bump renderKey to force re-render ───────────
 	const reset = useCallback(() => {
+		if (originalImgRef.current) setImgEl(originalImgRef.current);
 		setRotation(0);
-		setClaheEnabled(false);
-		cancelCrop();
-	}, [cancelCrop]);
+		setContrastEnabled(false);
+		setGamma(DEFAULT_GAMMA);
+		setCropMode(false);
+		// Force effects to re-run even if other deps are unchanged
+		setRenderKey((k) => k + 1);
+	}, []);
 
+	// ── Clear ─────────────────────────────────────────────────────────────────
 	const clear = useCallback(() => {
+		originalImgRef.current = null;
 		setImgEl(null);
-		reset();
-	}, [reset]);
+		setRotation(0);
+		setContrastEnabled(false);
+		setGamma(DEFAULT_GAMMA);
+		setCropMode(false);
+		setRenderKey(0);
+	}, []);
 
 	return {
 		imgEl,
+		cropMode,
+		cropKey,
+		startCropMode,
+		confirmCrop,
+		cancelCrop,
 		rotation,
 		setRotation,
-		claheEnabled,
-		setClaheEnabled,
-		claheLoading,
-		cropMode,
-		cropRect,
-		hasCropSelection: Boolean(cropStart && cropEnd),
+		gamma,
+		setGamma,
+		contrastEnabled,
+		setContrastEnabled,
+		processingLoading,
 		loadFile,
-		startCropMode,
-		cancelCrop,
-		confirmCrop,
 		reset,
-		clear,
-		onMouseDown,
-		onMouseMove,
-		onMouseUp
+		clear
 	};
 }

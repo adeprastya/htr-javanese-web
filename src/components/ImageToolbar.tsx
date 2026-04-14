@@ -1,29 +1,38 @@
 import { useState } from "react";
-import { Crop, RotateCw, Zap, RefreshCw, Info } from "lucide-react";
+import { Crop, RotateCw, SunMedium, Contrast, RefreshCw, Info } from "lucide-react";
 
 interface ImageToolbarProps {
 	cropMode: boolean;
 	rotation: number;
-	claheEnabled: boolean;
+	contrastEnabled: boolean;
+	gamma: number;
 	onStartCrop: () => void;
 	onCancelCrop: () => void;
 	onRotationChange: (deg: number) => void;
-	onToggleClahe: () => void;
+	onContrastToggle: () => void;
+	onGammaChange: (value: number) => void;
 	onReset: () => void;
 }
 
-type ActivePanel = "rotate" | null;
+type ActivePanel = "rotate" | "gamma" | null;
 
 const PRESET_ANGLES = [-90, -45, 0, 45, 90] as const;
+const GAMMA_MIN = 0.2;
+const GAMMA_MAX = 3.0;
+const GAMMA_STEP = 0.05;
+const GAMMA_DEFAULT = 1.0;
+const ROTATE_DEFAULT = 0;
 
 export function ImageToolbar({
 	cropMode,
 	rotation,
-	claheEnabled,
+	contrastEnabled,
+	gamma = 1.0,
 	onStartCrop,
 	onCancelCrop,
 	onRotationChange,
-	onToggleClahe,
+	onContrastToggle,
+	onGammaChange,
 	onReset
 }: ImageToolbarProps) {
 	const [activePanel, setActivePanel] = useState<ActivePanel>(null);
@@ -35,31 +44,46 @@ export function ImageToolbar({
 		else onStartCrop();
 	};
 
+	const handleOnReset = () => {
+		onReset();
+		setActivePanel(null);
+	};
+
+	const gammaIsActive = gamma !== GAMMA_DEFAULT;
+	const rotationIsActive = rotation !== ROTATE_DEFAULT;
+
 	return (
 		<div className="bg-neutral-100/65 backdrop-blur-md border border-neutral-200/80 rounded-2xl p-5 md:p-6 shadow-sm">
-			<p className="text-xs font-semibold text-neutral-400 uppercase tracking-widest mb-4">Pra-proses Citra</p>
+			<p className="text-sm font-semibold text-neutral-600 mb-4">Peningkatan Citra</p>
 
 			{/* Tool buttons row */}
 			<div className="flex flex-wrap gap-2 mb-4">
 				<ToolButton icon={<Crop size={15} />} label="Crop" active={cropMode} variant="sky" onClick={handleCropToggle} />
 				<ToolButton
 					icon={<RotateCw size={15} />}
-					label="Rotasi"
-					active={activePanel === "rotate"}
+					label={`Rotasi ${rotationIsActive ? `(${rotation}°)` : ""}`}
+					active={rotationIsActive || activePanel === "rotate"}
 					variant="violet"
 					onClick={() => togglePanel("rotate")}
 				/>
 				<ToolButton
-					icon={<Zap size={15} />}
-					label={`CLAHE${claheEnabled ? " ✓" : ""}`}
-					active={claheEnabled}
+					icon={<SunMedium size={15} />}
+					label={`Gamma${gammaIsActive ? ` (${gamma.toFixed(2)})` : ""}`}
+					active={gammaIsActive || activePanel === "gamma"}
 					variant="amber"
-					onClick={onToggleClahe}
+					onClick={() => togglePanel("gamma")}
 				/>
-				<ToolButton icon={<RefreshCw size={15} />} label="Reset" onClick={onReset} />
+				<ToolButton
+					icon={<Contrast size={15} />}
+					label={`Kontras${contrastEnabled ? " ✓" : ""}`}
+					active={contrastEnabled}
+					variant="teal"
+					onClick={onContrastToggle}
+				/>
+				<ToolButton icon={<RefreshCw size={15} />} label="Reset" onClick={handleOnReset} />
 			</div>
 
-			{/* Rotate panel */}
+			{/* ── Rotate panel ── */}
 			{activePanel === "rotate" && (
 				<div className="bg-violet-50 border border-violet-200 rounded-xl px-4 py-3 mb-3 animate-in fade-in slide-in-from-top-1 duration-200">
 					<div className="flex items-center justify-between mb-3">
@@ -102,14 +126,66 @@ export function ImageToolbar({
 				</div>
 			)}
 
-			{/* CLAHE info banner */}
-			{claheEnabled && (
+			{/* ── Gamma panel ── */}
+			{activePanel === "gamma" && (
+				<div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-3 animate-in fade-in slide-in-from-top-1 duration-200">
+					<div className="flex items-center justify-between mb-3">
+						<span className="text-sm font-medium text-amber-600">Gamma Correction</span>
+						<span className="text-sm font-semibold text-amber-600 font-mono">γ = {gamma.toFixed(2)}</span>
+					</div>
+
+					<input
+						type="range"
+						min={GAMMA_MIN}
+						max={GAMMA_MAX}
+						step={GAMMA_STEP}
+						value={gamma}
+						onChange={(e) => onGammaChange(Number(e.target.value))}
+						className="w-full accent-amber-500"
+					/>
+
+					<div className="flex justify-between text-xs text-neutral-400 mt-1">
+						<span>Cerah ({GAMMA_MIN})</span>
+						<span>Normal (1.0)</span>
+						<span>Gelap ({GAMMA_MAX})</span>
+					</div>
+
+					{/* Preset gamma buttons */}
+					<div className="flex gap-1.5 mt-3">
+						{([0.5, 0.75, 1.0, 1.5, 2.0] as const).map((v) => (
+							<button
+								key={v}
+								onClick={() => onGammaChange(v)}
+								className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors duration-150 font-sans cursor-pointer
+									${
+										gamma === v
+											? "bg-amber-500 text-neutral-100 border-amber-500"
+											: "bg-neutral-100 text-neutral-600 border-neutral-200 hover:border-amber-300 hover:text-amber-500"
+									}`}
+							>
+								{v}
+							</button>
+						))}
+					</div>
+
+					<button
+						onClick={() => onGammaChange(GAMMA_DEFAULT)}
+						className="mt-2 w-full text-xs text-amber-600 hover:text-amber-700 font-medium py-1 transition-colors duration-150 cursor-pointer"
+					>
+						Reset ke 1.0
+					</button>
+				</div>
+			)}
+
+			{/* ── Contrast info banner ── */}
+			{contrastEnabled && (
 				<div
-					className={`flex gap-2 items-start bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 animate-in fade-in slide-in-from-top-1 duration-200 ${activePanel === "rotate" ? "mt-3" : ""}`}
+					className={`flex gap-2 items-start bg-teal-50 border border-teal-200 rounded-xl px-4 py-3 animate-in fade-in slide-in-from-top-1 duration-200 ${activePanel ? "mt-3" : ""}`}
 				>
-					<Info size={14} className="text-amber-600 shrink-0 mt-0.5" />
-					<p className="text-xs text-amber-800 leading-relaxed">
-						CLAHE aktif — meningkatkan kontras lokal pada citra untuk hasil pengenalan yang lebih baik.
+					<Info size={14} className="text-teal-600 shrink-0 mt-0.5" />
+					<p className="text-xs text-teal-800 leading-relaxed">
+						Contrast stretching aktif — meregangkan rentang intensitas piksel agar kontras gambar meningkat secara
+						linear.
 					</p>
 				</div>
 			)}
@@ -119,7 +195,7 @@ export function ImageToolbar({
 
 // ── ToolButton ────────────────────────────────────────────────────────────────
 
-type ButtonVariant = "sky" | "violet" | "amber" | "neutral";
+type ButtonVariant = "sky" | "violet" | "amber" | "teal" | "neutral";
 
 interface ToolButtonProps {
 	icon: React.ReactNode;
@@ -142,6 +218,10 @@ const VARIANT_STYLES: Record<ButtonVariant, { active: string; inactive: string }
 		active: "bg-amber-100 border-amber-400 text-amber-600",
 		inactive: "bg-neutral-100 border-neutral-200 text-neutral-600 hover:border-amber-300 hover:text-amber-500"
 	},
+	teal: {
+		active: "bg-teal-100 border-teal-400 text-teal-600",
+		inactive: "bg-neutral-100 border-neutral-200 text-neutral-600 hover:border-teal-300 hover:text-teal-500"
+	},
 	neutral: {
 		active: "bg-neutral-200 border-neutral-400 text-neutral-700",
 		inactive: "bg-neutral-100 border-neutral-200 text-neutral-600 hover:border-neutral-400"
@@ -150,7 +230,6 @@ const VARIANT_STYLES: Record<ButtonVariant, { active: string; inactive: string }
 
 function ToolButton({ icon, label, active = false, variant = "neutral", onClick }: ToolButtonProps) {
 	const styles = VARIANT_STYLES[variant];
-
 	return (
 		<button
 			onClick={onClick}

@@ -30,10 +30,13 @@ export default function App() {
 			style={{ background: "linear-gradient(135deg, #c8d8f0 0%, #ddd0ed 45%, #f0cece 100%)" }}
 		>
 			<Navbar />
+
 			<Hero />
 
+			<FeatureCards />
+
 			{/* ── Main two-column layout ── */}
-			<section className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-screen mx-auto px-6 pb-12">
+			<section className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-screen mx-auto px-6 pb-6">
 				{/* Left column */}
 				<div className="flex flex-col gap-4">
 					{/* Upload / Preview card */}
@@ -44,12 +47,8 @@ export default function App() {
 							<ImagePreview
 								canvasRef={canvasRef as React.RefObject<HTMLCanvasElement>}
 								cropMode={editor.cropMode}
-								cropRect={editor.cropRect}
-								hasCropSelection={editor.hasCropSelection}
-								claheLoading={editor.claheLoading}
-								onMouseDown={editor.onMouseDown}
-								onMouseMove={editor.onMouseMove}
-								onMouseUp={editor.onMouseUp}
+								cropKey={editor.cropKey}
+								processingLoading={editor.processingLoading}
 								onConfirmCrop={editor.confirmCrop}
 								onCancelCrop={editor.cancelCrop}
 								onClear={() => {
@@ -64,12 +63,14 @@ export default function App() {
 					{editor.imgEl && (
 						<ImageToolbar
 							cropMode={editor.cropMode}
-							rotation={editor.rotation}
-							claheEnabled={editor.claheEnabled}
 							onStartCrop={editor.startCropMode}
 							onCancelCrop={editor.cancelCrop}
+							rotation={editor.rotation}
 							onRotationChange={editor.setRotation}
-							onToggleClahe={() => editor.setClaheEnabled((v) => !v)}
+							gamma={editor.gamma}
+							onGammaChange={editor.setGamma}
+							contrastEnabled={editor.contrastEnabled}
+							onContrastToggle={() => editor.setContrastEnabled((v) => !v)}
 							onReset={editor.reset}
 						/>
 					)}
@@ -78,7 +79,7 @@ export default function App() {
 					{editor.imgEl && (
 						<button
 							onClick={predict.predict}
-							disabled={predict.loading || editor.claheLoading}
+							disabled={predict.loading || editor.processingLoading}
 							className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-semibold text-base text-neutral-100 bg-linear-to-br from-sky-500 to-violet-500 hover:opacity-90 transition-opacity duration-150 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer border-none"
 						>
 							{predict.loading ? (
@@ -103,7 +104,6 @@ export default function App() {
 				</div>
 			</section>
 
-			<FeatureCards />
 			<Footer />
 		</div>
 	);
