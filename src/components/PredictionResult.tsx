@@ -1,4 +1,5 @@
-import { ScanText, Check, X } from "lucide-react";
+import { useState } from "react";
+import { ScanText, Check, X, Copy } from "lucide-react";
 
 interface PredictionResponse {
 	status: "success" | "error";
@@ -61,6 +62,16 @@ interface SuccessStateProps {
 }
 
 function SuccessState({ prediction }: SuccessStateProps) {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = () => {
+		if (!prediction) return;
+		navigator.clipboard.writeText(prediction).then(() => {
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		});
+	};
+
 	return (
 		<div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
 			<div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
@@ -68,11 +79,30 @@ function SuccessState({ prediction }: SuccessStateProps) {
 				<span className="text-sm text-green-700 font-medium">Pengenalan berhasil</span>
 			</div>
 
-			<div className="bg-neutral-100 border border-neutral-200 rounded-xl p-5">
-				<p className="text-xs sm:text-sm text-neutral-400 font-medium tracking-wide mb-2">Transkripsi</p>
+			<div className="group relative bg-neutral-100 border border-neutral-200 rounded-xl p-5 hover:border-sky-300 transition-colors">
+				<div className="flex justify-between items-start mb-2">
+					<p className="text-[10px] uppercase text-neutral-400 font-bold tracking-[0.15em]">Transkripsi</p>
+
+					{prediction && (
+						<button
+							onClick={handleCopy}
+							className="p-1.5 rounded-md hover:bg-white border border-transparent hover:border-neutral-200 text-neutral-400 hover:text-sky-500 transition-all"
+							title="Salin hasil"
+						>
+							{copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+						</button>
+					)}
+				</div>
+
 				<p className="font-javanese text-lg sm:text-xl font-medium text-neutral-800 tracking-widest break-all">
 					{prediction ?? "—"}
 				</p>
+
+				{copied && (
+					<span className="absolute top-2 right-10 text-[10px] font-mono text-green-600 animate-in fade-in zoom-in duration-200">
+						tersalin!
+					</span>
+				)}
 			</div>
 		</div>
 	);

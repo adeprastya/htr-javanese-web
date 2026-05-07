@@ -9,7 +9,8 @@ import {
 	PredictionResult,
 	TipsCard,
 	FeatureCards,
-	Footer
+	Footer,
+	ApiInfo
 } from "./components";
 import { useImageEditor, usePredict } from "./hooks";
 
@@ -102,6 +103,10 @@ export default function App() {
 					<PredictionResult result={predict.result} loading={predict.loading} error={predict.error} />
 					<TipsCard />
 				</div>
+			</section>
+
+			<section className="max-w-screen mx-auto px-6 pt-12 pb-6">
+				<ApiInfo />
 			</section>
 
 			<Footer />

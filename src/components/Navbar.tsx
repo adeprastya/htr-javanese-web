@@ -1,5 +1,5 @@
 const NAV_LINKS = [
-	{ name: "Model", href: "#model" },
+	{ name: "Model", href: "https://drive.google.com/file/d/1xG3y20Y8LLoptBVt6RGx2TpIyVsu51Jv/view?usp=drive_link" },
 	{ name: "Dataset", href: "https://drive.google.com/drive/folders/1F-Nur1FKPLDoY68k3_qi8veBSDO59jON?usp=sharing" },
 	{ name: "Code", href: "https://github.com/adeprastya/htr-javanese-model" }
 ] as const;

@@ -56,7 +56,7 @@ export function Hero() {
 
 			{/* Subtitle */}
 			<p className="text-neutral-600 text-sm sm:text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-				Kenali dan transliterasikan gambar teks Aksara Jawa secara instan menggunakan arsitektur jaringan saraf canggih
+				Kenali dan transkripsikan citra teks Aksara Jawa secara instan menggunakan arsitektur jaringan saraf canggih
 				dengan metode modern
 			</p>
 		</section>

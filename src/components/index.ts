@@ -7,3 +7,4 @@ export { PredictionResult } from "./PredictionResult";
 export { TipsCard } from "./TipsCard";
 export { FeatureCards } from "./FeatureCards";
 export { Footer } from "./Footer";
+export { ApiInfo } from "./ApiInfo";
