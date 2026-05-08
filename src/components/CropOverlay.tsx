@@ -50,6 +50,7 @@ export function CropOverlay({ containerW, containerH, onConfirm, onCancel }: Cro
 		e.preventDefault();
 		e.stopPropagation();
 		(e.target as Element).setPointerCapture(e.pointerId);
+
 		dragRef.current = {
 			handle,
 			startX: e.clientX,
@@ -60,6 +61,9 @@ export function CropOverlay({ containerW, containerH, onConfirm, onCancel }: Cro
 	};
 
 	const onPointerMove = (e: React.PointerEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+
 		const d = dragRef.current;
 		if (!d) return;
 
@@ -116,7 +120,10 @@ export function CropOverlay({ containerW, containerH, onConfirm, onCancel }: Cro
 		setBox({ x, y, w, h, isDragging: true });
 	};
 
-	const onPointerUp = () => {
+	const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		e.stopPropagation();
+		(e.target as Element).releasePointerCapture(e.pointerId);
 		dragRef.current = null;
 		setTimeout(() => {
 			setBox((prev) => ({ ...prev, isDragging: false }));
@@ -127,7 +134,7 @@ export function CropOverlay({ containerW, containerH, onConfirm, onCancel }: Cro
 	const { x, y, w, h } = box;
 
 	return (
-		<div className="absolute inset-0 select-none" onPointerMove={onPointerMove} onPointerUp={onPointerUp}>
+		<div className="touch-none select-none absolute inset-0" onPointerMove={onPointerMove} onPointerUp={onPointerUp}>
 			{/* Dim mask: 4 panels around the selection */}
 			<div className="absolute inset-0 pointer-events-none">
 				{/* Top */}

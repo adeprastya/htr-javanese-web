@@ -31,7 +31,7 @@ export function DropZoneBox({ onFile }: DropZoneBoxProps) {
 				}}
 				onDragLeave={() => setDragOver(false)}
 				onClick={() => fileRef.current?.click()}
-				className={`rounded-2xl px-6 py-14 text-center cursor-pointer transition-all duration-200 border-2 border-dashed
+				className={`touch-none rounded-2xl px-6 py-14 text-center cursor-pointer transition-all duration-200 border-2 border-dashed
 					${
 						dragOver
 							? "border-sky-500 bg-sky-500/5"
