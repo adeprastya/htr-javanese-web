@@ -20,7 +20,7 @@ interface CropOverlayProps {
 }
 
 const MIN_SIZE = 24;
-const HANDLE = 10;
+const HANDLE = 14;
 
 const HANDLE_CURSORS: Record<HandleType, string> = {
 	nw: "nw-resize",
@@ -177,7 +177,7 @@ export function CropOverlay({ containerW, containerH, onConfirm, onCancel }: Cro
 			<div
 				className="absolute z-50 flex gap-2"
 				style={{
-					left: x + 8,
+					left: x + 14,
 					top: y + 8,
 					visibility: box.isDragging ? "hidden" : "visible"
 				}}
@@ -185,16 +185,16 @@ export function CropOverlay({ containerW, containerH, onConfirm, onCancel }: Cro
 				<button
 					onPointerDown={(e) => e.stopPropagation()}
 					onClick={() => onConfirm(box)}
-					className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-500 text-neutral-100 text-sm font-semibold shadow-sm hover:bg-sky-600 transition-colors duration-150 cursor-pointer border-none"
+					className="flex items-center gap-1.5 px-2 py-1 rounded-sm bg-sky-500 text-neutral-100 text-xs shadow-sm hover:bg-sky-600 transition-colors duration-150 cursor-pointer border-none"
 				>
-					<Check size={14} /> Terapkan
+					<Check size={12} /> Terapkan
 				</button>
 				<button
 					onPointerDown={(e) => e.stopPropagation()}
 					onClick={onCancel}
-					className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-neutral-700/70 text-neutral-100 text-sm font-semibold shadow-sm hover:bg-neutral-700 transition-colors duration-150 cursor-pointer border-none"
+					className="flex items-center gap-1.5 px-2 py-1 rounded-sm bg-neutral-700/70 text-neutral-100 text-xs shadow-sm hover:bg-neutral-700 transition-colors duration-150 cursor-pointer border-none"
 				>
-					<X size={14} /> Batal
+					<X size={12} /> Batal
 				</button>
 			</div>
 		</div>
@@ -210,20 +210,20 @@ interface HandleProps {
 }
 
 const HANDLE_POSITION: Record<Exclude<HandleType, "move">, React.CSSProperties> = {
-	nw: { top: 0, left: 0, transform: "translate(-50%, -50%)" },
-	n: { top: 0, left: "50%", transform: "translate(-50%, -50%)" },
-	ne: { top: 0, right: 0, transform: "translate(50%, -50%)" },
-	e: { top: "50%", right: 0, transform: "translate(50%, -50%)" },
-	se: { bottom: 0, right: 0, transform: "translate(50%, 50%)" },
-	s: { bottom: 0, left: "50%", transform: "translate(-50%, 50%)" },
-	sw: { bottom: 0, left: 0, transform: "translate(-50%, 50%)" },
-	w: { top: "50%", left: 0, transform: "translate(-50%, -50%)" }
+	nw: { top: 0, left: 0, transform: "translate(-25%, -25%)" },
+	n: { top: 0, left: "50%", transform: "translate(-50%, -25%)" },
+	ne: { top: 0, right: 0, transform: "translate(25%, -25%)" },
+	e: { top: "50%", right: 0, transform: "translate(25%, -50%)" },
+	se: { bottom: 0, right: 0, transform: "translate(25%, 25%)" },
+	s: { bottom: 0, left: "50%", transform: "translate(-50%, 25%)" },
+	sw: { bottom: 0, left: 0, transform: "translate(-25%, 25%)" },
+	w: { top: "50%", left: 0, transform: "translate(-25%, -50%)" }
 };
 
 function Handle({ handle, size, onPointerDown }: HandleProps) {
 	return (
 		<div
-			className="absolute bg-neutral-100 border border-neutral-400 rounded-sm shadow-sm"
+			className="absolute bg-neutral-100 border border-neutral-400 rounded-xs shadow-sm"
 			style={{
 				width: size,
 				height: size,

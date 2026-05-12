@@ -50,7 +50,7 @@ export function ImagePreview({
 				</button>
 			</div>
 
-			<div ref={containerRef} className="relative rounded-xl overflow-hidden bg-neutral-100">
+			<div ref={containerRef} className="relative rounded-xs sm:rounded-sm overflow-hidden bg-neutral-100">
 				<canvas ref={canvasRef} className="block w-full h-auto max-h-80" />
 
 				{processingLoading && (
